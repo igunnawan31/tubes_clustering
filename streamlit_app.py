@@ -291,7 +291,7 @@ elif parentoption == 'Input Data':
             fig, ax = plt.subplots(figsize=(8, 6))
         
             # Plot clusters
-            sns.scatterplot(data=final_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
+            sns.scatterplot(data=scaled_data_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
         
             # Highlight user input
             plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
