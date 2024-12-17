@@ -33,8 +33,17 @@ with st.expander('Feature Data'):
     st.dataframe(datapca.head())
 
 with st.expander('Data Normalization'):
-    st.write("### Feature Data menggunakan StandardScaler (Setelah Normalisasi) :")
+    st.write("### Feature Data setelah Menangani Missing Values:")
+    
+    feature_data_clean = feature_data.fillna(feature_data.mean())
+
+    st.write("### Feature Data Types:")
+    st.write(feature_data_clean.dtypes)
+    
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(feature_data)
+    X_scaled = scaler.fit_transform(feature_data_clean)
     X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+    
+    st.write("### Feature Data setelah Normalisasi (StandardScaler):")
+    st.dataframe(X_scaled_df.head())
     
