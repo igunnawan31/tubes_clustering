@@ -51,7 +51,7 @@ elif option == 'PCA Data':
         st.dataframe(datapca.head())
 
         st.write("### Cleaned PCA Data:")
-        datapca_clean = datapca.fillna(feature_data.mean())
+        datapca_clean = datapca.fillna(features_to_pca.mean())
         st.dataframe(datapca_clean.head())
 
         st.write("### Normalization PCA Data:")
