@@ -275,16 +275,15 @@ elif parentoption == 'Input Data':
             # Scale user input features (reuse fitted scalers)
             user_features_scaled = scaler.transform(user_input.fillna(user_input.mean()))
             user_pca_scaled = scaler.transform(user_pca_input.fillna(user_pca_input.mean()))
-        
-            # Apply PCA to user input
-            user_pca = pca.transform(user_pca_scaled)
-        
-            # Combine user features and PCA components
-            user_final = pd.concat(
-                [pd.DataFrame(user_features_scaled, columns=features),
-                 pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
-                axis=1
-            )
+            
+            pca = PCA(n_components=2)
+            data_pca = pca.fit_transform(user_pca)
+            user_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
+          
+            cleaned_data = pd.concat([user_features_scaled, user_pca_scaled], axis=1)
+            scaler_data = StandardScaler()
+            scaled_data = scaler.fit_transform(cleaned_data)
+            user_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
         
             # Predict cluster
             user_cluster = kmeans.predict(user_final)[0]
