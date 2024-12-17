@@ -126,23 +126,21 @@ elif parentoption == 'Models':
     k_clusters = st.sidebar.slider("Select Number of Clusters (K)", 2, 10, 3)
 
     st.write("### Data Preparation for Clustering")
-    
-    # PCA Feature Selection (PC1 and PC2 as example)
+
+    st.dataframe(scaled_data_final.head())
+
     features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
     datapca = data[features_to_pca].fillna(data[features_to_pca].mean())
 
-    # Normalization
     scaler = StandardScaler()
     scaled_pca = scaler.fit_transform(datapca)
     pca = PCA(n_components=2)
     pca_result = pca.fit_transform(scaled_pca)
-
-    # Prepare DataFrame
+  
     df_pca = pd.DataFrame(pca_result, columns=['PC1', 'PC2'])
     st.write("### PCA-Reduced Data:")
     st.dataframe(df_pca.head())
 
-    # Apply KMeans
     kmeans = KMeans(n_clusters=k_clusters, random_state=42)
     df_pca['Cluster'] = kmeans.fit_predict(df_pca)
 
