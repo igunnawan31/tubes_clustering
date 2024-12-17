@@ -284,7 +284,8 @@ elif parentoption == 'Input Data':
             scaler_data = StandardScaler()
             scaled_data = scaler.fit_transform(cleaned_data)
             user_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
-        
+            st.dataframe(user_final.head())
+          
             # Predict cluster
             user_cluster = kmeans.predict(user_final)[0]
             user_final['Cluster'] = user_cluster
