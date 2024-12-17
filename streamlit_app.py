@@ -287,15 +287,19 @@ elif parentoption == 'Input Data':
             st.dataframe(user_input_combined)
             st.write(f"### Predicted Cluster: {user_cluster}")
 
-            # Visualization
             st.write("### Cluster Visualization with Your Data:")
             fig, ax = plt.subplots(figsize=(8, 6))
-            sns.scatterplot(data=scaled_data_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-            plt.scatter(user_input_combined['PC1'], user_input_combined['PC2'], color='red', s=200, label='Your Input')
+        
+            # Plot clusters
+            sns.scatterplot(data=final_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
+        
+            # Highlight user input
+            plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
             plt.title("KMeans Clustering with User Data")
             plt.xlabel("Principal Component 1")
             plt.ylabel("Principal Component 2")
             plt.legend()
+        
             st.pyplot(fig)
 
         except ValueError as e:
