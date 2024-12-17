@@ -83,3 +83,19 @@ elif option == 'Data Normalization':
 
         st.write("### Feature Data after Normalization (StandardScaler):")
         st.dataframe(X_scaled_df.head())
+      
+        features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+        datapca = data[features_to_pca]
+      
+        datapca_clean = datapca.fillna(datapca.mean())
+      
+        scaler = StandardScaler()
+        PCA_scaled = scaler.fit_transform(datapca_clean)
+        PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
+      
+        pca = PCA(n_components=2)
+        data_pca = pca.fit_transform(PCA_scaled_df)
+        df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
+
+        cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
+        st.dataframe(cleaned_data.head())
