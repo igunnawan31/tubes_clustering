@@ -3,6 +3,7 @@ import pandas as pd
 import io
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 
 # Title and Information
 st.title('🎈 Clustering with Gym Dataset')
