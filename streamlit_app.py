@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import io
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
@@ -17,118 +17,144 @@ parentoption = st.sidebar.radio("Select Section:",
                                 ['Exploratory Data Analysis', 'Models', 'Input Data'])
 
 # Load Dataset
-data_url = 'https://raw.githubusercontent.com/igunnawan31/data/refs/heads/main/gym_members_exercise_tracking.csv'
-data = pd.read_csv(data_url)
+@st.cache_data
+def load_data():
+    data_url = 'https://raw.githubusercontent.com/igunnawan31/data/refs/heads/main/gym_members_exercise_tracking.csv'
+    return pd.read_csv(data_url)
 
-# Features for processing
-features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
-features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+data = load_data()
 
-# Cleaning and Scaling Data
-feature_data_clean = data[features].fillna(data[features].mean())
-datapca_clean = data[features_to_pca].fillna(data[features_to_pca].mean())
+# Function to preprocess and return scaled data
+def preprocess_data(data):
+    features = ['Calories_Burned', 'Water_Intake (liters)', 
+                'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+    features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 
+                       'Avg_BPM', 'Resting_BPM', 'Experience_Level']
 
-scaler_features = StandardScaler()
-scaler_pca = StandardScaler()
+    # Fill missing values
+    feature_data = data[features].fillna(data[features].mean())
+    datapca = data[features_to_pca].fillna(data[features_to_pca].mean())
 
-X_scaled_features = scaler_features.fit_transform(feature_data_clean)
-X_scaled_pca = scaler_pca.fit_transform(datapca_clean)
+    # Scaling
+    scaler_features = StandardScaler()
+    X_scaled = scaler_features.fit_transform(feature_data)
+    X_scaled_df = pd.DataFrame(X_scaled, columns=features)
 
-# PCA Transformation
-pca = PCA(n_components=2)
-pca_result = pca.fit_transform(X_scaled_pca)
-df_pca = pd.DataFrame(pca_result, columns=['PC1', 'PC2'])
+    scaler_pca = StandardScaler()
+    PCA_scaled = scaler_pca.fit_transform(datapca)
+    pca = PCA(n_components=2)
+    data_pca = pca.fit_transform(PCA_scaled)
 
-# Combine Data for Clustering
-combined_data = np.hstack([X_scaled_features, pca_result])
-combined_columns = features + ['PC1', 'PC2']
-cleaned_data = pd.DataFrame(combined_data, columns=combined_columns)
+    df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
 
-# Default Clustering with 3 Clusters
-kmeans = KMeans(n_clusters=3, random_state=42)
-cleaned_data['Cluster'] = kmeans.fit_predict(combined_data)
+    # Final combined dataset
+    final_data = pd.concat([X_scaled_df, df_pca], axis=1)
+    return final_data, scaler_features, scaler_pca, pca
+
+final_data, scaler_features, scaler_pca, pca = preprocess_data(data)
 
 # 1. Exploratory Data Analysis
 if parentoption == 'Exploratory Data Analysis':
     st.subheader("🔍 Exploratory Data Analysis (EDA)")
-    st.write("### Dataset Overview")
-    st.dataframe(data.head())
 
-    st.write("### Cleaned Feature Data:")
-    st.dataframe(feature_data_clean.head())
+    option = st.sidebar.radio("Choose EDA Section:", 
+                              ['Dataset Overview', 'Feature Data', 'PCA Data'])
 
-    st.write("### PCA-Reduced Data:")
-    st.dataframe(df_pca.head())
+    if option == 'Dataset Overview':
+        st.subheader("📊 Dataset Overview")
+        with st.expander('Dataset Preview'):
+            st.dataframe(data.head())
 
-    # Visualization
-    st.write("### PCA Visualization with Clusters")
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.scatterplot(data=cleaned_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, ax=ax)
-    plt.title("PCA and KMeans Clustering")
-    st.pyplot(fig)
+        st.write("### Data Information:")
+        buffer = io.StringIO()
+        data.info(buf=buffer)
+        st.text(buffer.getvalue())
+
+    elif option == 'Feature Data':
+        st.subheader("📈 Feature Data")
+        features = ['Calories_Burned', 'Water_Intake (liters)', 
+                    'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+        st.write("### Selected Features:")
+        st.dataframe(data[features].head())
+
+    elif option == 'PCA Data':
+        st.subheader("🧩 PCA Data")
+        st.write("### PCA-Reduced Data:")
+        st.dataframe(final_data[['PC1', 'PC2']].head())
 
 # 2. Models Section
 elif parentoption == 'Models':
-    st.subheader("📊 KMeans Clustering Model")
+    st.subheader("📊 Models for Clustering")
+
+    st.sidebar.subheader("KMeans Settings")
     k_clusters = st.sidebar.slider("Select Number of Clusters (K)", 2, 10, 3)
 
-    # Fit KMeans with User-Selected Clusters
     kmeans = KMeans(n_clusters=k_clusters, random_state=42)
-    cleaned_data['Cluster'] = kmeans.fit_predict(combined_data)
+    final_data['Cluster'] = kmeans.fit_predict(final_data)
 
-    st.write(f"### Clustered Data with {k_clusters} Clusters:")
-    st.dataframe(cleaned_data.head())
+    st.write("### Clustered Data:")
+    st.dataframe(final_data.head())
 
-    # Visualization
-    st.write(f"### KMeans Clustering Visualization with {k_clusters} Clusters")
+    st.write("### Cluster Visualization")
     fig, ax = plt.subplots(figsize=(8, 6))
-    sns.scatterplot(data=cleaned_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, ax=ax)
-    plt.title(f"KMeans Clustering Results with {k_clusters} Clusters")
+    sns.scatterplot(data=final_data, x='PC1', y='PC2', hue='Cluster', 
+                    palette='Set2', s=100, legend="full", ax=ax)
+    plt.title("KMeans Clustering Results")
     st.pyplot(fig)
 
 # 3. Input Data Section
 elif parentoption == 'Input Data':
     st.subheader("📥 Input Data for Clustering")
-    st.write("### Enter Your Data Below:")
-
-    # User Input Form
     with st.form("user_input_form"):
-        calories_burned = st.slider('Calories Burned', 0, 1000, 500)
-        water_intake = st.slider('Water Intake (liters)', 0.0, 5.0, 2.5)
-        workout_frequency = st.slider('Workout Frequency (days/week)', 0, 7, 3)
-        fat_percentage = st.slider('Fat Percentage (%)', 0.0, 50.0, 25.0)
-        bmi = st.slider('BMI', 0.0, 50.0, 22.5)
-        
+        # User Input
+        age = st.slider('Age', 0, 100, 30)
         weight = st.slider('Weight (kg)', 30.0, 150.0, 70.0)
         height = st.slider('Height (m)', 1.0, 2.5, 1.75)
-        max_bpm = st.slider('Max BPM', 50, 200, 120)
-        avg_bpm = st.slider('Avg BPM', 50, 200, 100)
-        resting_bpm = st.slider('Resting BPM', 40, 100, 60)
-        experience_level = st.slider('Experience Level (1-5)', 1, 5, 3)
-
+        max_bpm = st.slider('Max BPM', 50, 250, 180)
+        avg_bpm = st.slider('Average BPM', 50, 250, 140)
+        resting_bpm = st.slider('Resting BPM', 30, 100, 60)
+        calories_burned = st.slider('Calories Burned', 50, 1000, 400)
+        fat_percentage = st.slider('Fat Percentage (%)', 5.0, 50.0, 25.0)
+        water_intake = st.slider('Water Intake (liters)', 0.0, 10.0, 2.5)
+        workout_frequency = st.slider('Workout Frequency (days/week)', 1, 7, 3)
+        experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
         submit_button = st.form_submit_button(label='Submit')
 
     if submit_button:
-        # Prepare user input
-        user_features = np.array([[calories_burned, water_intake, workout_frequency, fat_percentage, bmi]])
-        user_pca_input = np.array([[weight, height, max_bpm, avg_bpm, resting_bpm, experience_level]])
+        # Create user data
+        user_data = pd.DataFrame({
+            'Calories_Burned': [calories_burned],
+            'Water_Intake (liters)': [water_intake],
+            'Workout_Frequency (days/week)': [workout_frequency],
+            'Fat_Percentage': [fat_percentage],
+            'BMI': [weight / (height ** 2)],
+            'Weight (kg)': [weight],
+            'Height (m)': [height],
+            'Max_BPM': [max_bpm],
+            'Avg_BPM': [avg_bpm],
+            'Resting_BPM': [resting_bpm],
+            'Experience_Level': [experience_level]
+        })
 
-        # Scale and Transform Input
-        user_scaled_features = scaler_features.transform(user_features)
-        user_scaled_pca = scaler_pca.transform(user_pca_input)
-        user_pca_result = pca.transform(user_scaled_pca)
+        # Scaling user data
+        user_features = scaler_features.transform(user_data[['Calories_Burned', 'Water_Intake (liters)',
+                                                             'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']])
+        user_pca = pca.transform(scaler_pca.transform(user_data[['Weight (kg)', 'Height (m)', 'Max_BPM', 
+                                                                'Avg_BPM', 'Resting_BPM', 'Experience_Level']]))
 
-        user_combined = np.hstack([user_scaled_features, user_pca_result])
-        user_cluster = kmeans.predict(user_combined)[0]
+        # Combine user data
+        user_final = pd.concat([pd.DataFrame(user_features, columns=['Calories_Burned', 'Water_Intake (liters)', 
+                                                                     'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']),
+                                pd.DataFrame(user_pca, columns=['PC1', 'PC2'])], axis=1)
 
-        # Display Prediction
-        st.success(f"Your data is predicted to belong to **Cluster {user_cluster}**!")
+        # Predict cluster
+        user_cluster = kmeans.predict(user_final)[0]
+        st.success(f"Predicted Cluster: {user_cluster}")
 
         # Visualization
-        st.write("### Your Data Point in the Cluster Plot")
         fig, ax = plt.subplots(figsize=(8, 6))
-        sns.scatterplot(data=cleaned_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, ax=ax)
-        plt.scatter(user_pca_result[0, 0], user_pca_result[0, 1], color='red', s=200, label='Your Input')
-        plt.title("Your Data in the PCA Cluster Space")
+        sns.scatterplot(data=final_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, ax=ax)
+        plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Data')
+        plt.title("KMeans Clustering with Your Data")
         plt.legend()
         st.pyplot(fig)
