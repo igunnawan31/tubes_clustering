@@ -255,6 +255,8 @@ elif parentoption == 'Input Data':
         kmeans = KMeans(n_clusters=3, random_state=42)
         kmeans.fit(scaled_data_df)
 
+        scaled_data_df['Cluster'] = kmeans.labels_
+
         # Prediction on User Input
         try:
             # Extract user input features
