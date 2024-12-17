@@ -14,5 +14,6 @@ with st.expander('Data'):
     st.dataframe(data.head())  # Display the first few rows of the dataset
 
     st.write("### Data Information:")
+    buffer = io.StringIO()
     info_str = buffer.getvalue()  # Get the content of the buffer as a string
     st.text(info_str)
