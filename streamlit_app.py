@@ -197,7 +197,7 @@ elif parentoption == 'Input Data':
         workout_type = st.radio('Workout Type', ('Yoga', 'HIIT', 'Cardio', 'Strength'))
         fat_percentage = st.slider('Fat Percentage (%)', 5.0, 50.0, 25.0)
         water_intake = st.slider('Water Intake (liters)', 0.0, 10.0, 2.5)
-        workout_frequency = st.slider('Workout Frequency (days/week)', 1, 7, 3)
+        workout_frequency = st.slider('Workout_Frequency (days/week)', 1, 7, 3)
         experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
         bmi = st.slider('BMI', 10.0, 50.0, 22.0)
     
@@ -220,7 +220,7 @@ elif parentoption == 'Input Data':
             'Workout Type': workout_type,
             'Fat Percentage (%)': fat_percentage,
             'Water_Intake (liters)': water_intake,
-            'Workout Frequency (days/week)': workout_frequency,
+            'Workout_Frequency (days/week)': workout_frequency,
             'Fat_Percentage': fat_percentage,
             'Experience_Level': experience_level,
             'BMI': bmi
