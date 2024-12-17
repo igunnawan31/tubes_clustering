@@ -124,13 +124,11 @@ elif parentoption == 'Models':
     # Sidebar for Model Options
     st.sidebar.subheader("KMeans Settings")
     k_clusters = st.sidebar.slider("Select Number of Clusters (K)", 2, 10, 3)
-
-    st.write("### Data Preparation for Clustering")
+  
     features = ['Calories_Burned', 'Water_Intake (liters)', 
                 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
     feature_data = data[features]
     feature_data_clean = feature_data.fillna(feature_data.mean())
-    st.dataframe(feature_data_clean.head())
 
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(feature_data_clean)
