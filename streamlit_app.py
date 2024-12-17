@@ -225,12 +225,12 @@ elif parentoption == 'Input Data':
             'Experience_Level': experience_level,
             'BMI': bmi
         }
-  
-        # Convert to DataFrame
+
+        #Convert User Input to DataFrame
         input_df = pd.DataFrame([user_input_data])
         st.dataframe(input_df.head())
 
-        # Scaling User Input Data
+        # KMeans Model
         scaler = StandardScaler()
         features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
         features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
@@ -253,43 +253,52 @@ elif parentoption == 'Input Data':
         df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
 
         try:
-            user_scaled = scaler.transform(input_df[features])
+            user_input = input_df[features]
+            user_pca_input = input_df[features_to_pca]
 
-            # Transform user PCA features using the globally fitted PCA
-            user_pca = pca.transform(scaler.transform(input_df[features_to_pca]))
-
+            cleaned_user_input = user_input.fillna(user_input.mean())
+            scaler = StandardScaler()
+            user_scaled = scaler.fit_transform(cleaned_user_input)
+        
+            # Step 2: Apply PCA on user input features
+            cleaned_user_pca = user_pca_input.fillna(user_pca_input.mean())
+            user_pca = pca.transform(scaler.fit_transform(cleaned_user_pca))
+        
             # Combine scaled features and PCA-transformed features
             user_final = pd.concat(
                 [pd.DataFrame(user_scaled, columns=features), pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
                 axis=1
             )
-
+        
             # Predict cluster for user data
             user_cluster = kmeans.predict(user_final)[0]
             user_final['Cluster'] = user_cluster
-
+        
             # Display user data with predicted cluster
             st.write("### Your Input Data:")
             st.dataframe(user_final)
-
+        
             st.write(f"### Predicted Cluster: {user_cluster}")
-
+        
             # Visualization
             st.write("### Cluster Visualization with Your Data:")
             fig, ax = plt.subplots(figsize=(8, 6))
-
+        
             # Plot original clusters
             sns.scatterplot(data=df_pca, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-
+        
             # Highlight user input data
             plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
             plt.title("KMeans Clustering with User Data")
             plt.xlabel("Principal Component 1")
             plt.ylabel("Principal Component 2")
             plt.legend()
-
+        
             st.pyplot(fig)
-
+        
         except ValueError as e:
             st.error(f"An error occurred: {e}")
             st.write("Please check the input data and ensure all values are correctly formatted.")
+        
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")
