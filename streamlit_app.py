@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+from sklearn.preprocessing import StandardScaler
 
 st.title('🎈 Clustering with Gym Dataset')
 st.info('Website for Machine Learning Model')
@@ -30,3 +31,10 @@ with st.expander('Feature Data'):
     features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
     datapca = restdata[features_to_pca]
     st.dataframe(datapca.head())
+
+with st.expander('Data Normalization'):
+    st.write("### Feature Data menggunakan StandardScaler (Setelah Normalisasi) :")
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(feature_data)
+    X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+    
