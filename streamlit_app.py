@@ -280,7 +280,7 @@ elif parentoption == 'Input Data':
             data_pca = pca.fit_transform(user_pca)
             user_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
           
-            cleaned_data = pd.concat([user_features_scaled, user_pca_scaled], axis=1)
+            cleaned_data = pd.concat([user_features_scaled, user_pca], axis=1)
             scaler_data = StandardScaler()
             scaled_data = scaler.fit_transform(cleaned_data)
             user_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
