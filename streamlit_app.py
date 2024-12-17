@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
