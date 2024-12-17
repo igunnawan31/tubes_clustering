@@ -268,41 +268,40 @@ elif parentoption == 'Input Data':
         df_pca['Cluster'] = kmeans.fit_predict(df_pca)
 
         try:
-            user_input = input_df[features]
-            user_pca_input = input_df[features_to_pca]
-
-            cleaned_user_input = user_input.fillna(user_input.mean())
-            scaler = StandardScaler()
-            user_scaled = scaler.fit_transform(cleaned_user_input)
-        
-            # Step 2: Apply PCA on user input features
+            # Scale and transform user input for PCA (match feature count)
             cleaned_user_pca = user_pca_input.fillna(user_pca_input.mean())
-            user_pca = pca.transform(scaler.fit_transform(cleaned_user_pca))
+            user_pca_scaled = scaler_pca.transform(cleaned_user_pca)  # Use the same scaler
+            user_pca = pca.transform(user_pca_scaled)                # Use the same PCA model
         
-            # Combine scaled features and PCA-transformed features
+            # Scale and combine user input features (for KMeans)
+            cleaned_user_input = user_input.fillna(user_input.mean())
+            scaler_features = StandardScaler()
+            user_features_scaled = scaler_features.fit_transform(cleaned_user_input)
+        
+            # Combine scaled features and PCA components
             user_final = pd.concat(
-                [pd.DataFrame(user_scaled, columns=features), pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
+                [pd.DataFrame(user_features_scaled, columns=features),
+                 pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
                 axis=1
             )
         
-            # Predict cluster for user data
+            # Predict cluster
             user_cluster = kmeans.predict(user_final)[0]
             user_final['Cluster'] = user_cluster
         
-            # Display user data with predicted cluster
+            # Display the result
             st.write("### Your Input Data:")
             st.dataframe(user_final)
-        
             st.write(f"### Predicted Cluster: {user_cluster}")
         
             # Visualization
             st.write("### Cluster Visualization with Your Data:")
             fig, ax = plt.subplots(figsize=(8, 6))
         
-            # Plot original clusters
+            # Plot clusters
             sns.scatterplot(data=df_pca, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
         
-            # Highlight user input data
+            # Highlight user input
             plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
             plt.title("KMeans Clustering with User Data")
             plt.xlabel("Principal Component 1")
@@ -313,7 +312,5 @@ elif parentoption == 'Input Data':
         
         except ValueError as e:
             st.error(f"An error occurred: {e}")
-            st.write("Please check the input data and ensure all values are correctly formatted.")
-        
         except Exception as e:
             st.error(f"An unexpected error occurred: {e}")
