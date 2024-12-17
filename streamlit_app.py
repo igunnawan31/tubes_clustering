@@ -17,11 +17,16 @@ with st.expander('Data'):
     st.text(info_str)
 
 with st.expander('Feature Data'):
-    st.write("**Feature Data**")
+    st.write("### Feature Data:")
     features = ['Calories_Burned','Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
     feature_data = data[features]
     feature_data
-
+    
+    st.write("### Data Lainnya:")
     restdata = data.drop(features, axis=1)
     restdata
-    
+
+    st.write("### Feature Data:")
+    features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+    datapca = restdata[features_to_pca]
+    datapca
