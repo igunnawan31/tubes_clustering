@@ -224,29 +224,6 @@ elif parentoption == 'Input Data':
                 'Fat_Percentage', 'BMI']
     features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
 
-    # Handle missing values
-    feature_data_clean = data[features].fillna(data[features].mean())
-    datapca_clean = data[features_to_pca].fillna(data[features_to_pca].mean())
-
-    # Fit scaler on original data
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(feature_data_clean)
-    PCA_scaled = scaler.fit_transform(datapca_clean)
-
-    # PCA Transformation
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(PCA_scaled)
-    df_pca = pd.DataFrame(pca_result, columns=['PC1', 'PC2'])
-
-    # Combine Data
-    cleaned_data = pd.concat([pd.DataFrame(X_scaled, columns=features), df_pca], axis=1)
-
-    # KMeans Clustering
-    k_clusters = 3  # Default value; you can make this dynamic
-    kmeans = KMeans(n_clusters=k_clusters, random_state=42)
-    cleaned_data['Cluster'] = kmeans.fit_predict(cleaned_data)
-
-    # Process User Input for Clustering
     user_scaled = scaler.transform(input_df[features])
     user_pca = pca.transform(scaler.transform(input_df[features_to_pca]))
     user_final = pd.concat(
@@ -279,3 +256,7 @@ elif parentoption == 'Input Data':
     plt.legend()
 
     st.pyplot(fig)
+
+except ValueError as e:
+    st.error(f"An error occurred: {e}")
+    st.write("Please check the input data and ensure all values are correctly formatted.")
