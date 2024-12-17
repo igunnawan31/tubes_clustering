@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+from matplotlib import pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
