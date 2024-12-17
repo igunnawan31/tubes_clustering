@@ -228,6 +228,7 @@ elif parentoption == 'Input Data':
   
         # Convert to DataFrame
         input_df = pd.DataFrame([user_input_data])
+        st.dataframe(input_df.head())
 
         # Scaling User Input Data
         scaler = StandardScaler()
