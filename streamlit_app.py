@@ -60,7 +60,7 @@ elif option == 'PCA Data':
         PCA_scaled = scaler.fit_transform(datapca_clean)
         PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
 
-        st.write("### PCA Data after Cleaned & Normalization (Standard Scaler):")
+        st.write("#### PCA Data after Cleaned & Normalization (Standard Scaler):")
         st.dataframe(PCA_scaled_df.head())
 
 # Option 4: Data Normalization
