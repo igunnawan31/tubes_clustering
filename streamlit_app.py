@@ -134,8 +134,6 @@ elif parentoption == 'Models':
     X_scaled = scaler.fit_transform(feature_data_clean)
     X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
 
-    st.write("### Feature Data after Normalization (StandardScaler):")
-
     features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
     datapca = data[features_to_pca]
     datapca_clean = datapca.fillna(datapca.mean())
