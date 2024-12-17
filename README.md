@@ -1,7 +1,4 @@
-# 📦 Streamlit App Starter Kit 
-```
-⬆️ (Replace above with your app's name)
-```
+# 📦 Clustering with Gym Exercise Dataset 
 
 Description of the app ...
 
