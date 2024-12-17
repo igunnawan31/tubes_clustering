@@ -15,5 +15,6 @@ with st.expander('Data'):
 
     st.write("### Data Information:")
     buffer = io.StringIO()
+    data.info(buf=buffer)
     info_str = buffer.getvalue()  # Get the content of the buffer as a string
     st.text(info_str)
