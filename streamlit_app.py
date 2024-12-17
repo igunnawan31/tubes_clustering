@@ -273,9 +273,8 @@ elif parentoption == 'Input Data':
           
             # Scale and transform user input for PCA (match feature count)
             cleaned_user_pca = user_pca_input.fillna(user_pca_input.mean())
-            scaler_pca = StandardScaler()
-            user_pca_scaled = scaler_pca.transform(cleaned_user_pca)  # Use the same scaler
-            user_pca = pca.transform(user_pca_scaled)                # Use the same PCA model
+            user_pca_scaled = scaler.transform(cleaned_user_pca)
+            user_pca = pca.transform(user_pca_scaled)
         
             # Scale and combine user input features (for KMeans)
             cleaned_user_input = user_input.fillna(user_input.mean())
