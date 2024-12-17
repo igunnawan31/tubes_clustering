@@ -296,12 +296,11 @@ elif parentoption == 'Input Data':
             sns.scatterplot(data=scaled_data_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
         
             # Highlight user input
-            plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
+            plt.scatter(user_input_final[:, -2], user_input_final[:, -1], color='red', s=200, label='Your Input')
             plt.title("KMeans Clustering with User Data")
             plt.xlabel("Principal Component 1")
             plt.ylabel("Principal Component 2")
             plt.legend()
-        
             st.pyplot(fig)
 
         except ValueError as e:
