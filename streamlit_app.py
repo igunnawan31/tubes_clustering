@@ -4,12 +4,9 @@ import io
 
 st.title('🎈 Clustering with Gym Dataset')
 st.info('Website for Machine Learning Model')
+data = pd.read_csv('https://raw.githubusercontent.com/igunnawan31/data/refs/heads/main/gym_members_exercise_tracking.csv')
 
-# Load Data
 with st.expander('Data'):
-    # Load the dataset
-    data = pd.read_csv('https://raw.githubusercontent.com/igunnawan31/data/refs/heads/main/gym_members_exercise_tracking.csv')
-
     st.write("### Dataset Preview:")
     st.dataframe(data.head())  # Display the first few rows of the dataset
 
@@ -18,3 +15,13 @@ with st.expander('Data'):
     data.info(buf=buffer)
     info_str = buffer.getvalue()  # Get the content of the buffer as a string
     st.text(info_str)
+
+with st.expander('Feature Data'):
+    st.write("**Feature Data**")
+    features = ['Calories_Burned','Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+    feature_data = data[features]
+    feature_data
+
+    restdata = data.drop(features, axis=1)
+    restdata
+    
