@@ -224,39 +224,40 @@ elif parentoption == 'Input Data':
                 'Fat_Percentage', 'BMI']
     features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
 
-    user_scaled = scaler.transform(input_df[features])
-    user_pca = pca.transform(scaler.transform(input_df[features_to_pca]))
-    user_final = pd.concat(
-        [pd.DataFrame(user_scaled, columns=features), pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
-        axis=1
-    )
-
-    # Predict Cluster for User Input
-    user_cluster = kmeans.predict(user_final)[0]
-    user_final['Cluster'] = user_cluster
-
-    # Display User Data with Cluster
-    st.write("### Your Input Data:")
-    st.dataframe(user_final)
-
-    st.write(f"### Predicted Cluster: {user_cluster}")
-
-    # Visualization
-    st.write("### Cluster Visualization with Your Data:")
-    fig, ax = plt.subplots(figsize=(8, 6))
-
-    # Plot Original Clusters
-    sns.scatterplot(data=cleaned_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-
-    # Plot User Input Data
-    plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
-    plt.title("KMeans Clustering with User Data")
-    plt.xlabel("Principal Component 1")
-    plt.ylabel("Principal Component 2")
-    plt.legend()
-
-    st.pyplot(fig)
-
-except ValueError as e:
-    st.error(f"An error occurred: {e}")
-    st.write("Please check the input data and ensure all values are correctly formatted.")
+    try:
+        user_scaled = scaler.transform(input_df[features])
+        user_pca = pca.transform(scaler.transform(input_df[features_to_pca]))
+        user_final = pd.concat(
+            [pd.DataFrame(user_scaled, columns=features), pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
+            axis=1
+        )
+    
+        # Predict Cluster for User Input
+        user_cluster = kmeans.predict(user_final)[0]
+        user_final['Cluster'] = user_cluster
+    
+        # Display User Data with Cluster
+        st.write("### Your Input Data:")
+        st.dataframe(user_final)
+    
+        st.write(f"### Predicted Cluster: {user_cluster}")
+    
+        # Visualization
+        st.write("### Cluster Visualization with Your Data:")
+        fig, ax = plt.subplots(figsize=(8, 6))
+    
+        # Plot Original Clusters
+        sns.scatterplot(data=cleaned_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
+    
+        # Plot User Input Data
+        plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
+        plt.title("KMeans Clustering with User Data")
+        plt.xlabel("Principal Component 1")
+        plt.ylabel("Principal Component 2")
+        plt.legend()
+    
+        st.pyplot(fig)
+    
+    except ValueError as e:
+        st.error(f"An error occurred: {e}")
+        st.write("Please check the input data and ensure all values are correctly formatted.")
