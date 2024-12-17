@@ -183,6 +183,7 @@ elif parentoption == 'Input Data':
     st.subheader("📥 Input Data for Clustering")
     st.write("### Enter Your Own Data:")
 
+with st.form(key='user_input_form'):
     # User Input Data
     age = st.slider('Age', 0, 100, 30)
     gender = st.radio('Gender', ('Male', 'Female'))
@@ -200,23 +201,25 @@ elif parentoption == 'Input Data':
     experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
     bmi = st.slider('BMI', 10.0, 50.0, 22.0)
 
+    # Form submit button inside the form block
     submit_button = st.form_submit_button(label='Submit')
 
+    # Actions to perform after submitting
     if submit_button:
-      # Collect User Input Data into a Dictionary
-      user_input_data = {
-          'Calories_Burned': calories_burned,
-          'Water_Intake (liters)': water_intake,
-          'Workout_Frequency (days/week)': workout_frequency,
-          'Fat_Percentage': fat_percentage,
-          'BMI': bmi,
-          'Weight (kg)': weight,
-          'Height (m)': height,
-          'Max_BPM': max_bpm,
-          'Avg_BPM': avg_bpm,
-          'Resting_BPM': resting_bpm,
-          'Experience_Level': experience_level
-      }
+        # Collect User Input Data into a Dictionary
+        user_input_data = {
+            'Calories_Burned': calories_burned,
+            'Water_Intake (liters)': water_intake,
+            'Workout_Frequency (days/week)': workout_frequency,
+            'Fat_Percentage': fat_percentage,
+            'BMI': bmi,
+            'Weight (kg)': weight,
+            'Height (m)': height,
+            'Max_BPM': max_bpm,
+            'Avg_BPM': avg_bpm,
+            'Resting_BPM': resting_bpm,
+            'Experience_Level': experience_level
+        }
   
       # Convert to DataFrame
       input_df = pd.DataFrame([user_input_data])
