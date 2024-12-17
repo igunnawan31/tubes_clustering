@@ -52,7 +52,7 @@ elif option == 'PCA Data':
 
         st.write("### Cleaned PCA Data:")
         datapca_clean = datapca.fillna(feature_data.mean())
-        st.dataframe(datapca_clean.head)
+        st.dataframe(datapca_clean.head())
 
         st.write("### Normalization PCA Data:")
         scaler = StandardScaler()
