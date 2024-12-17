@@ -183,26 +183,26 @@ elif parentoption == 'Input Data':
     st.subheader("📥 Input Data for Clustering")
     st.write("### Enter Your Own Data:")
 
-with st.form(key='user_input_form'):
-    # User Input Data
-    age = st.slider('Age', 0, 100, 30)
-    gender = st.radio('Gender', ('Male', 'Female'))
-    weight = st.slider('Weight (kg)', 30.0, 150.0, 70.0)
-    height = st.slider('Height (m)', 1.0, 2.5, 1.75)
-    max_bpm = st.slider('Max BPM', 50, 250, 180)
-    avg_bpm = st.slider('Average BPM', 50, 250, 140)
-    resting_bpm = st.slider('Resting BPM', 30, 100, 60)
-    session_duration = st.slider('Session Duration (hours)', 0.0, 5.0, 1.5)
-    calories_burned = st.slider('Calories Burned', 50, 1000, 400)
-    workout_type = st.radio('Workout Type', ('Yoga', 'HIIT', 'Cardio', 'Strength'))
-    fat_percentage = st.slider('Fat Percentage (%)', 5.0, 50.0, 25.0)
-    water_intake = st.slider('Water Intake (liters)', 0.0, 10.0, 2.5)
-    workout_frequency = st.slider('Workout Frequency (days/week)', 1, 7, 3)
-    experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
-    bmi = st.slider('BMI', 10.0, 50.0, 22.0)
-
-    # Form submit button inside the form block
-    submit_button = st.form_submit_button(label='Submit')
+    with st.form(key='user_input_form'):
+        # User Input Data
+        age = st.slider('Age', 0, 100, 30)
+        gender = st.radio('Gender', ('Male', 'Female'))
+        weight = st.slider('Weight (kg)', 30.0, 150.0, 70.0)
+        height = st.slider('Height (m)', 1.0, 2.5, 1.75)
+        max_bpm = st.slider('Max BPM', 50, 250, 180)
+        avg_bpm = st.slider('Average BPM', 50, 250, 140)
+        resting_bpm = st.slider('Resting BPM', 30, 100, 60)
+        session_duration = st.slider('Session Duration (hours)', 0.0, 5.0, 1.5)
+        calories_burned = st.slider('Calories Burned', 50, 1000, 400)
+        workout_type = st.radio('Workout Type', ('Yoga', 'HIIT', 'Cardio', 'Strength'))
+        fat_percentage = st.slider('Fat Percentage (%)', 5.0, 50.0, 25.0)
+        water_intake = st.slider('Water Intake (liters)', 0.0, 10.0, 2.5)
+        workout_frequency = st.slider('Workout Frequency (days/week)', 1, 7, 3)
+        experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
+        bmi = st.slider('BMI', 10.0, 50.0, 22.0)
+    
+        # Form submit button inside the form block
+        submit_button = st.form_submit_button(label='Submit')
 
     # Actions to perform after submitting
     if submit_button:
@@ -221,69 +221,69 @@ with st.form(key='user_input_form'):
             'Experience_Level': experience_level
         }
   
-      # Convert to DataFrame
-      input_df = pd.DataFrame([user_input_data])
-  
-      # Scaling User Input Data
-      scaler = StandardScaler()
-      features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
-      features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+        # Convert to DataFrame
+        input_df = pd.DataFrame([user_input_data])
 
-      feature_data = data[features]
-      feature_data_clean = feature_data.fillna(feature_data.mean())
+        # Scaling User Input Data
+        scaler = StandardScaler()
+        features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+        features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
 
-      X_scaled = scaler.fit_transform(feature_data_clean)
-      X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+        feature_data = data[features]
+        feature_data_clean = feature_data.fillna(feature_data.mean())
 
-      datapca = data[features_to_pca]
-      datapca_clean = datapca.fillna(datapca.mean())
-  
-      scaler = StandardScaler()
-      PCA_scaled = scaler.fit_transform(datapca_clean)
-      PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
-  
-      pca = PCA(n_components=2)
-      data_pca = pca.fit_transform(PCA_scaled_df)
-      df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
-  
-      try:
-        user_scaled = scaler.transform(input_df[features])
-        
-        # Transform user PCA features using the globally fitted PCA
-        user_pca = pca.transform(scaler.transform(input_df[features_to_pca]))
-        
-        # Combine scaled features and PCA-transformed features
-        user_final = pd.concat(
-            [pd.DataFrame(user_scaled, columns=features), pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
-            axis=1
-        )
-        
-        # Predict cluster for user data
-        user_cluster = kmeans.predict(user_final)[0]
-        user_final['Cluster'] = user_cluster
-        
-        # Display user data with predicted cluster
-        st.write("### Your Input Data:")
-        st.dataframe(user_final)
-        
-        st.write(f"### Predicted Cluster: {user_cluster}")
-        
-        # Visualization
-        st.write("### Cluster Visualization with Your Data:")
-        fig, ax = plt.subplots(figsize=(8, 6))
-        
-        # Plot original clusters
-        sns.scatterplot(data=df_pca, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-        
-        # Highlight user input data
-        plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
-        plt.title("KMeans Clustering with User Data")
-        plt.xlabel("Principal Component 1")
-        plt.ylabel("Principal Component 2")
-        plt.legend()
-        
-        st.pyplot(fig)
-      
-      except ValueError as e:
-          st.error(f"An error occurred: {e}")
-          st.write("Please check the input data and ensure all values are correctly formatted.")
+        X_scaled = scaler.fit_transform(feature_data_clean)
+        X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+
+        datapca = data[features_to_pca]
+        datapca_clean = datapca.fillna(datapca.mean())
+
+        scaler = StandardScaler()
+        PCA_scaled = scaler.fit_transform(datapca_clean)
+        PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
+
+        pca = PCA(n_components=2)
+        data_pca = pca.fit_transform(PCA_scaled_df)
+        df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
+
+        try:
+            user_scaled = scaler.transform(input_df[features])
+
+            # Transform user PCA features using the globally fitted PCA
+            user_pca = pca.transform(scaler.transform(input_df[features_to_pca]))
+
+            # Combine scaled features and PCA-transformed features
+            user_final = pd.concat(
+                [pd.DataFrame(user_scaled, columns=features), pd.DataFrame(user_pca, columns=['PC1', 'PC2'])],
+                axis=1
+            )
+
+            # Predict cluster for user data
+            user_cluster = kmeans.predict(user_final)[0]
+            user_final['Cluster'] = user_cluster
+
+            # Display user data with predicted cluster
+            st.write("### Your Input Data:")
+            st.dataframe(user_final)
+
+            st.write(f"### Predicted Cluster: {user_cluster}")
+
+            # Visualization
+            st.write("### Cluster Visualization with Your Data:")
+            fig, ax = plt.subplots(figsize=(8, 6))
+
+            # Plot original clusters
+            sns.scatterplot(data=df_pca, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
+
+            # Highlight user input data
+            plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
+            plt.title("KMeans Clustering with User Data")
+            plt.xlabel("Principal Component 1")
+            plt.ylabel("Principal Component 2")
+            plt.legend()
+
+            st.pyplot(fig)
+
+        except ValueError as e:
+            st.error(f"An error occurred: {e}")
+            st.write("Please check the input data and ensure all values are correctly formatted.")
