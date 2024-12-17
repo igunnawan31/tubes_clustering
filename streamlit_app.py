@@ -268,6 +268,9 @@ elif parentoption == 'Input Data':
         df_pca['Cluster'] = kmeans.fit_predict(df_pca)
 
         try:
+            user_input = input_df[features]
+            user_pca_input = input_df[features_to_pca]
+          
             # Scale and transform user input for PCA (match feature count)
             cleaned_user_pca = user_pca_input.fillna(user_pca_input.mean())
             user_pca_scaled = scaler_pca.transform(cleaned_user_pca)  # Use the same scaler
