@@ -195,7 +195,7 @@ elif parentoption == 'Input Data':
         session_duration = st.slider('Session Duration (hours)', 0.0, 5.0, 1.5)
         calories_burned = st.slider('Calories Burned', 50, 1000, 400)
         workout_type = st.radio('Workout Type', ('Yoga', 'HIIT', 'Cardio', 'Strength'))
-        fat_percentage = st.slider('Fat Percentage (%)', 5.0, 50.0, 25.0)
+        fat_percentage = st.slider('Fat_Percentage (%)', 5.0, 50.0, 25.0)
         water_intake = st.slider('Water Intake (liters)', 0.0, 10.0, 2.5)
         workout_frequency = st.slider('Workout_Frequency (days/week)', 1, 7, 3)
         experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
@@ -217,7 +217,7 @@ elif parentoption == 'Input Data':
             'Session Duration (hours)': session_duration,
             'Calories_Burned': calories_burned,
             'Workout Type': workout_type,
-            'Fat Percentage (%)': fat_percentage,
+            'Fat_Percentage (%)': fat_percentage,
             'Water_Intake (liters)': water_intake,
             'Workout_Frequency (days/week)': workout_frequency,
             'Experience_Level': experience_level,
@@ -229,7 +229,7 @@ elif parentoption == 'Input Data':
         st.dataframe(input_df.head())
 
         # KMeans Model Preparation (Training)
-        features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+        features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage (%)', 'BMI']
         features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
 
         # Train with cleaned data
