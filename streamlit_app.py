@@ -20,13 +20,13 @@ with st.expander('Feature Data'):
     st.write("### Feature Data:")
     features = ['Calories_Burned','Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
     feature_data = data[features]
-    feature_data
+    st.dataframe(feature_data.head())
     
     st.write("### Data Lainnya:")
     restdata = data.drop(features, axis=1)
-    restdata
+    st.dataframe(restdata.head())
 
-    st.write("### Feature Data:")
+    st.write("### PCA Data:")
     features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
     datapca = restdata[features_to_pca]
-    datapca
+    st.dataframe(datapca.head())
