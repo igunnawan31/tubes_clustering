@@ -200,11 +200,10 @@ elif parentoption == 'Input Data':
         workout_frequency = st.slider('Workout_Frequency (days/week)', 1, 7, 3)
         experience_level = st.slider('Experience Level (0 = Beginner, 5 = Expert)', 0, 5, 2)
         bmi = st.slider('BMI', 10.0, 50.0, 22.0)
-    
+
         # Form submit button inside the form block
         submit_button = st.form_submit_button(label='Submit')
 
-    # Actions to perform after submitting
     if submit_button:
         # Collect User Input Data into a Dictionary
         user_input_data = {
@@ -221,95 +220,83 @@ elif parentoption == 'Input Data':
             'Fat Percentage (%)': fat_percentage,
             'Water_Intake (liters)': water_intake,
             'Workout_Frequency (days/week)': workout_frequency,
-            'Fat_Percentage': fat_percentage,
             'Experience_Level': experience_level,
             'BMI': bmi
         }
 
-        #Convert User Input to DataFrame
+        # Convert User Input to DataFrame
         input_df = pd.DataFrame([user_input_data])
         st.dataframe(input_df.head())
 
-        # KMeans Model
-        features = ['Calories_Burned', 'Water_Intake (liters)', 
-                'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
-        feature_data = data[features]
-        feature_data_clean = feature_data.fillna(feature_data.mean())
-    
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(feature_data_clean)
-        X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
-    
+        # KMeans Model Preparation (Training)
+        features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
         features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
-        datapca = data[features_to_pca]
-        datapca_clean = datapca.fillna(datapca.mean())
-    
-        scaler = StandardScaler()
-        PCA_scaled = scaler.fit_transform(datapca_clean)
-        PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
-    
-        pca = PCA(n_components=2)
-        data_pca = pca.fit_transform(PCA_scaled_df)
-        df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
-    
-        cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
-        scaler_data = StandardScaler()
-        scaled_data = scaler.fit_transform(cleaned_data)
-        scaled_data_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
-    
-        scaler = StandardScaler()
-        scaled_pca = scaler.fit_transform(scaled_data_final)
-        pca = PCA(n_components=2)
-        pca_result = pca.fit_transform(scaled_pca)
-      
-        df_pca = pd.DataFrame(pca_result, columns=['PC1', 'PC2'])
-    
-        kmeans = KMeans(n_clusters=3, random_state=42)
-        df_pca['Cluster'] = kmeans.fit_predict(df_pca)
 
+        # Train with cleaned data
+        feature_data_clean = data[features].fillna(data[features].mean())
+        scaler_features = StandardScaler()
+        X_scaled = scaler_features.fit_transform(feature_data_clean)
+        X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data_clean.columns)
+
+        # PCA for other features
+        datapca = data[features_to_pca].fillna(data[features_to_pca].mean())
+        scaler_pca = StandardScaler()
+        PCA_scaled = scaler_pca.fit_transform(datapca)
+        pca = PCA(n_components=2)
+        data_pca = pca.fit_transform(PCA_scaled)
+        df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
+
+        # Combine and scale data for training
+        cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
+        scaler_combined = StandardScaler()
+        scaled_data = scaler_combined.fit_transform(cleaned_data)
+        scaled_data_df = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
+
+        kmeans = KMeans(n_clusters=3, random_state=42)
+        kmeans.fit(scaled_data_df)
+
+        # Prediction on User Input
         try:
-            # Extract user input features (ensure consistent column order)
-            user_input = input_df[features]
-            user_pca_input = input_df[features_to_pca]
-        
-            # Scale user input features (reuse fitted scalers)
-            user_features_scaled = scaler.transform(user_input.fillna(user_input.mean()))
-            user_pca_scaled = scaler.transform(user_pca_input.fillna(user_pca_input.mean()))
-            
-            pca = PCA(n_components=2)
-            data_pca = pca.fit_transform(user_pca)
-            user_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
-          
-            cleaned_data = pd.concat([user_features_scaled, user_pca], axis=1)
-            scaler_data = StandardScaler()
-            scaled_data = scaler.fit_transform(cleaned_data)
-            user_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
-            st.dataframe(user_final.head())
-          
+            # Extract user input features
+            user_input_features = input_df[features]
+            user_input_pca = input_df[features_to_pca]
+
+            # Scale user input features using trained scalers
+            user_input_scaled_features = scaler_features.transform(user_input_features.fillna(user_input_features.mean()))
+            user_input_scaled_pca = scaler_pca.transform(user_input_pca.fillna(user_input_pca.mean()))
+
+            # Apply PCA to user input
+            user_input_pca = pca.transform(user_input_scaled_pca)
+
+            # Combine user input features and PCA components
+            user_input_combined = pd.concat(
+                [pd.DataFrame(user_input_scaled_features, columns=features),
+                 pd.DataFrame(user_input_pca, columns=['PC1', 'PC2'])],
+                axis=1
+            )
+
+            # Scale combined features
+            user_input_final = scaler_combined.transform(user_input_combined)
+
             # Predict cluster
-            user_cluster = kmeans.predict(user_final)[0]
-            user_final['Cluster'] = user_cluster
-        
+            user_cluster = kmeans.predict(user_input_final)[0]
+            user_input_combined['Cluster'] = user_cluster
+
             # Display the result
             st.write("### Your Input Data with Predicted Cluster:")
-            st.dataframe(user_final)
+            st.dataframe(user_input_combined)
             st.write(f"### Predicted Cluster: {user_cluster}")
-        
+
             # Visualization
             st.write("### Cluster Visualization with Your Data:")
             fig, ax = plt.subplots(figsize=(8, 6))
-        
-            # Plot clusters
-            sns.scatterplot(data=final_data, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-        
-            # Highlight user input
-            plt.scatter(user_final['PC1'], user_final['PC2'], color='red', s=200, label='Your Input')
+            sns.scatterplot(data=scaled_data_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
+            plt.scatter(user_input_combined['PC1'], user_input_combined['PC2'], color='red', s=200, label='Your Input')
             plt.title("KMeans Clustering with User Data")
             plt.xlabel("Principal Component 1")
             plt.ylabel("Principal Component 2")
             plt.legend()
-        
             st.pyplot(fig)
-        
+
         except ValueError as e:
             st.error(f"An error occurred: {e}")
