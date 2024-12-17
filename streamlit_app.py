@@ -50,6 +50,18 @@ elif option == 'PCA Data':
         datapca = data[features_to_pca]
         st.dataframe(datapca.head())
 
+        st.write("### Cleaned PCA Data:")
+        datapca_clean = datapca.fillna(feature_data.mean())
+        st.dataframe(datapca_clean.head)
+
+        st.write("### Normalization PCA Data:")
+        scaler = StandardScaler()
+        PCA_scaled = scaler.fit_transform(datapca_clean)
+        PCA_scaled_df = pd.Dataframe(PCA_scaled, column=features_to_pca.columns)
+
+        st.write("### PCA Data after Cleaned & Normalization (Standard Scaler)")
+        st.dataframe(PCA_scaled_df.head())
+
 # Option 4: Data Normalization
 elif option == 'Data Normalization':
     st.subheader("🔧 Data Normalization")
