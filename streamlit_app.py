@@ -32,7 +32,8 @@ if option == 'Dataset Overview':
 elif option == 'Feature Data':
     st.subheader("📈 Feature Data")
     with st.expander('Feature Data'):
-        features = ['Calories_Burned','Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+        features = ['Calories_Burned', 'Water_Intake (liters)', 
+                    'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
         st.write("### Selected Features:")
         feature_data = data[features]
         st.dataframe(feature_data.head())
@@ -51,15 +52,15 @@ elif option == 'PCA Data':
         st.dataframe(datapca.head())
 
         st.write("### Cleaned PCA Data:")
-        datapca_clean = datapca.fillna(features_to_pca.mean())
+        datapca_clean = datapca.fillna(datapca.mean())
         st.dataframe(datapca_clean.head())
 
         st.write("### Normalization PCA Data:")
         scaler = StandardScaler()
         PCA_scaled = scaler.fit_transform(datapca_clean)
-        PCA_scaled_df = pd.DataFrame(PCA_scaled, column=features_to_pca.columns)
+        PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
 
-        st.write("### PCA Data after Cleaned & Normalization (Standard Scaler)")
+        st.write("### PCA Data after Cleaned & Normalization (Standard Scaler):")
         st.dataframe(PCA_scaled_df.head())
 
 # Option 4: Data Normalization
@@ -67,7 +68,8 @@ elif option == 'Data Normalization':
     st.subheader("🔧 Data Normalization")
     with st.expander('Data Normalization'):
         st.write("### Feature Data after Handling Missing Values:")
-        features = ['Calories_Burned','Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+        features = ['Calories_Burned', 'Water_Intake (liters)', 
+                    'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
         feature_data = data[features]
         feature_data_clean = feature_data.fillna(feature_data.mean())
         st.dataframe(feature_data_clean.head())
