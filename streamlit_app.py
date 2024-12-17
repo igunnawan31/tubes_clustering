@@ -220,7 +220,7 @@ elif parentoption == 'Input Data':
             'Workout Type': workout_type,
             'Fat Percentage (%)': fat_percentage,
             'Water_Intake (liters)': water_intake,
-            'Workout_Frequency (days/week)': workout_frequency,
+            'Workout Frequency (days/week)': workout_frequency,
             'Fat_Percentage': fat_percentage,
             'Experience_Level': experience_level,
             'BMI': bmi
