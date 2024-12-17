@@ -208,17 +208,22 @@ elif parentoption == 'Input Data':
     if submit_button:
         # Collect User Input Data into a Dictionary
         user_input_data = {
-            'Calories_Burned': calories_burned,
-            'Water_Intake (liters)': water_intake,
-            'Workout_Frequency (days/week)': workout_frequency,
-            'Fat_Percentage': fat_percentage,
-            'BMI': bmi,
+            'Age': age,
+            'Gender': gender,
             'Weight (kg)': weight,
             'Height (m)': height,
             'Max_BPM': max_bpm,
             'Avg_BPM': avg_bpm,
             'Resting_BPM': resting_bpm,
-            'Experience_Level': experience_level
+            'Session Duration (hours)': session_duration,
+            'Calories_Burned': calories_burned,
+            'Workout Type': workout_type,
+            'Fat Percentage (%)': fat_percentage,
+            'Water_Intake (liters)': water_intake,
+            'Workout_Frequency (days/week)': workout_frequency,
+            'Fat_Percentage': fat_percentage,
+            'Experience_Level': experience_level,
+            'BMI': bmi
         }
   
         # Convert to DataFrame
