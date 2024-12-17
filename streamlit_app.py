@@ -117,8 +117,43 @@ if parentoption == 'Exploratory Data Analysis':
 # 2. Models Section
 elif parentoption == 'Models':
     st.subheader("📊 Models for Clustering")
-    st.write("### Coming Soon 🚧")
-    st.info("This section will include clustering models such as K-Means, Hierarchical Clustering, etc.")
+
+    # Sidebar for Model Options
+    st.sidebar.subheader("KMeans Settings")
+    k_clusters = st.sidebar.slider("Select Number of Clusters (K)", 2, 10, 3)
+
+    st.write("### Data Preparation for Clustering")
+    
+    # PCA Feature Selection (PC1 and PC2 as example)
+    features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+    datapca = data[features_to_pca].fillna(data[features_to_pca].mean())
+
+    # Normalization
+    scaler = StandardScaler()
+    scaled_pca = scaler.fit_transform(datapca)
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(scaled_pca)
+
+    # Prepare DataFrame
+    df_pca = pd.DataFrame(pca_result, columns=['PC1', 'PC2'])
+    st.write("### PCA-Reduced Data:")
+    st.dataframe(df_pca.head())
+
+    # Apply KMeans
+    kmeans = KMeans(n_clusters=k_clusters, random_state=42)
+    df_pca['Cluster'] = kmeans.fit_predict(df_pca)
+
+    st.write(f"### KMeans Clustering with {k_clusters} Clusters:")
+    st.dataframe(df_pca.head())
+
+    # Visualization
+    st.write("### Cluster Visualization")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    sns.scatterplot(data=df_pca, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
+    plt.title("KMeans Clustering Results")
+    plt.xlabel("Principal Component 1")
+    plt.ylabel("Principal Component 2")
+    st.pyplot(fig)
 
 # 3. Input Data Section
 elif parentoption == 'Input Data':
