@@ -99,4 +99,9 @@ elif option == 'Data Normalization':
         df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
 
         cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
-        st.dataframe(cleaned_data.head())
+        scaler_data = StandardScaler()
+        scaled_data = scaler.fit_transform(cleaned_data)
+        scaled_data_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
+
+        st.write("### Data Final for Clustering")
+        st.dataframe(scaled_data_final.head())
