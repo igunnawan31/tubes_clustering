@@ -126,14 +126,40 @@ elif parentoption == 'Models':
     k_clusters = st.sidebar.slider("Select Number of Clusters (K)", 2, 10, 3)
 
     st.write("### Data Preparation for Clustering")
-
-    st.dataframe(scaled_data_final.head())
-
-    features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
-    datapca = data[features_to_pca].fillna(data[features_to_pca].mean())
+    features = ['Calories_Burned', 'Water_Intake (liters)', 
+                'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+    feature_data = data[features]
+    feature_data_clean = feature_data.fillna(feature_data.mean())
+    st.dataframe(feature_data_clean.head())
 
     scaler = StandardScaler()
-    scaled_pca = scaler.fit_transform(datapca)
+    X_scaled = scaler.fit_transform(feature_data_clean)
+    X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+
+    st.write("### Feature Data after Normalization (StandardScaler):")
+
+    features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+    datapca = data[features_to_pca]
+    datapca_clean = datapca.fillna(datapca.mean())
+
+    scaler = StandardScaler()
+    PCA_scaled = scaler.fit_transform(datapca_clean)
+    PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
+
+    pca = PCA(n_components=2)
+    data_pca = pca.fit_transform(PCA_scaled_df)
+    df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
+
+    cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
+    scaler_data = StandardScaler()
+    scaled_data = scaler.fit_transform(cleaned_data)
+    scaled_data_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
+
+    st.write("### Data Final for Clustering")
+    st.dataframe(scaled_data_final.head())
+
+    scaler = StandardScaler()
+    scaled_pca = scaler.fit_transform(scaled_data_final)
     pca = PCA(n_components=2)
     pca_result = pca.fit_transform(scaled_pca)
   
