@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import io
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 # Title and Information
 st.title('🎈 Clustering with Gym Dataset')
