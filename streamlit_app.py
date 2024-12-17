@@ -34,7 +34,7 @@ scaler_features = StandardScaler().fit(feature_data_clean)
 scaler_pca = StandardScaler().fit(datapca_clean)
 
 pca = PCA(n_components=2)
-pca_result = pca.fit_transform(scaler_pca.transform(datapca_clean))
+pca_result = pca.fit_transform(scaler_pca.transform(scaler_pca))
 
 # Combined data for clustering
 X_combined = np.hstack([
