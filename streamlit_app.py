@@ -273,8 +273,8 @@ elif parentoption == 'Input Data':
             user_pca_input = input_df[features_to_pca]
         
             # Scale user input features (reuse fitted scalers)
-            user_features_scaled = scaler_features.transform(user_input.fillna(user_input.mean()))
-            user_pca_scaled = scaler_pca.transform(user_pca_input.fillna(user_pca_input.mean()))
+            user_features_scaled = scaler.transform(user_input.fillna(user_input.mean()))
+            user_pca_scaled = scaler.transform(user_pca_input.fillna(user_pca_input.mean()))
         
             # Apply PCA to user input
             user_pca = pca.transform(user_pca_scaled)
