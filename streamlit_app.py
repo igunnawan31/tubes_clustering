@@ -281,7 +281,7 @@ elif parentoption == 'Input Data':
         X_scaled = scaler.fit_transform(cleaned_data)
         X_scaled_df = pd.DataFrame(X_scaled, columns=cleaned_data.columns)
     
-        kmeans = KMeans(n_clusters=k_clusters, random_state=42)
+        kmeans = KMeans(n_clusters=2, random_state=42)
         labels = kmeans.fit_predict(X_scaled_df)
         X_scaled_df['Cluster'] = labels
     
