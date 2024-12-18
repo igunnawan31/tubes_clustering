@@ -102,7 +102,7 @@ if parentoption == 'Exploratory Data Analysis':
 
             scaler = StandardScaler()
             X_scaled = scaler.fit_transform(cleaned_data)
-            X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+            X_scaled_df = pd.DataFrame(X_scaled, columns=cleaned_data.columns)
 
             st.write("### Feature Data after Normalization (StandardScaler):")
             st.dataframe(X_scaled_df.head())
@@ -159,7 +159,7 @@ elif parentoption == 'Models':
 
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(cleaned_data)
-    X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+    X_scaled_df = pd.DataFrame(X_scaled, columns=cleaned_data.columns)
 
     kmeans = KMeans(n_clusters=k_clusters, random_state=42)
     labels = kmeans.fit_predict(X_scaled_df)
@@ -279,7 +279,7 @@ elif parentoption == 'Input Data':
     
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(cleaned_data)
-        X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+        X_scaled_df = pd.DataFrame(X_scaled, columns=cleaned_data.columns)
     
         kmeans = KMeans(n_clusters=k_clusters, random_state=42)
         labels = kmeans.fit_predict(X_scaled_df)
