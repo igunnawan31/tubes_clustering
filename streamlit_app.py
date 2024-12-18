@@ -263,7 +263,7 @@ elif parentoption == 'Input Data':
         scaled_data_df = pd.DataFrame(scaled_features, columns=features)
 
         # KMeans Clustering
-        k_clusters = 4
+        k_clusters = 2
         kmeans = KMeans(n_clusters=k_clusters, random_state=42)
         scaled_data_df['Cluster'] = kmeans.fit_predict(scaled_features)
 
