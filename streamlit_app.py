@@ -253,7 +253,7 @@ elif parentoption == 'Input Data':
         scaled_data_df = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
 
         kmeans = KMeans(n_clusters=3, random_state=42)
-        kmeans.fit(scaled_data_df)
+        model = kmeans.fit(scaled_data_df)
 
         scaled_data_df['Cluster'] = kmeans.labels_
 
@@ -281,7 +281,7 @@ elif parentoption == 'Input Data':
             user_input_final = scaler_combined.transform(user_input_combined)
 
             # Predict cluster
-            user_cluster = kmeans.predict(user_input_final)[0]
+            user_cluster = model.predict(user_input_final)[0]
             user_input_combined['Cluster'] = user_cluster
 
             # Display the result
