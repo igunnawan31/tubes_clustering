@@ -240,7 +240,7 @@ elif parentoption == 'Input Data':
         GenderMap = {"Male": 0, "Female": 1}
 
         input_df['Gender'] = input_df['Gender'].map(GenderMap)
-        input_df['Workout_Type'] = input_df['Workout_Type'].map(WorkoutTypeMap)
+        input_df['Workout Type'] = input_df['Workout Type'].map(WorkoutTypeMap)
 
         # Display Input Data
         st.dataframe(input_df)
