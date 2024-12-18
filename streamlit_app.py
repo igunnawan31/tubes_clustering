@@ -291,7 +291,7 @@ elif parentoption == 'Input Data':
         pca_df['Cluster'] = labels
         
         plt.figure(figsize=(10, 6))
-        for cluster in range(optimal_clusters):
+        for cluster in range(2):
             cluster_data = pca_df[pca_df['Cluster'] == cluster]
             plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}', cmap='viridis', s=100, edgecolors='k')
         
