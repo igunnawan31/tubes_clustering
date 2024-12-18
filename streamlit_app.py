@@ -290,34 +290,32 @@ elif parentoption == 'Input Data':
         pca_data = pca.fit_transform(X_scaled_df.drop(columns=['Cluster']))
         pca_df = pd.DataFrame(pca_data, columns=['PCA1', 'PCA2'])
         pca_df['Cluster'] = labels
-        
-        plt.figure(figsize=(10, 6))
-        for cluster in range(2):
-            cluster_data = pca_df[pca_df['Cluster'] == cluster]
-            plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}', cmap='viridis', s=100, edgecolors='k')
-        
-        cluster_centers_pca = pca.transform(kmeans.cluster_centers_)
-        plt.scatter(cluster_centers_pca[:, 0], cluster_centers_pca[:, 1],
-                    c='red', marker='X', s=300, label='Centroids')
-        
-        plt.xlabel('PCA1')
-        plt.ylabel('PCA2')
-        plt.title('Visualisasi Hasil Clustering dengan PCA')
-        plt.legend()
-        plt.show()
 
         # Predict Cluster for User Input
         user_input_scaled = scaler.transform(input_df[features])
         user_cluster = kmeans.predict(user_input_scaled)[0]
 
-        # Add the user input point
+        # Visualization
+        plt.figure(figsize=(10, 6))
+        for cluster in range(2):
+            cluster_data = pca_df[pca_df['Cluster'] == cluster]
+            plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}', s=100, edgecolors='k')
+        
+        # Cluster centroids
+        cluster_centers_pca = pca.transform(kmeans.cluster_centers_)
+        plt.scatter(cluster_centers_pca[:, 0], cluster_centers_pca[:, 1],
+                    c='red', marker='X', s=300, label='Centroids')
+
+        # Add user input
         plt.scatter(user_input_pca[0, 0], user_input_pca[0, 1], 
                     c='blue', marker='o', s=200, label='User Input', edgecolors='k')
-        
+
         plt.xlabel('PCA1')
         plt.ylabel('PCA2')
         plt.title('Visualization of Clustering with User Input')
         plt.legend()
-        plt.show()
+        st.pyplot(plt)
 
+        # Predict Cluster for User Input
+        user_cluster = kmeans.predict(user_input_scaled)[0]
         st.success(f"Your data belongs to Cluster: {user_cluster}")
