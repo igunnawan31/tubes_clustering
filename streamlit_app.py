@@ -199,7 +199,7 @@ elif parentoption == 'Input Data':
         max_bpm = st.slider('Max BPM', 50, 250, 180)
         avg_bpm = st.slider('Average BPM', 50, 250, 140)
         resting_bpm = st.slider('Resting BPM', 30, 100, 60)
-        session_duration = st.slider('Session Duration (hours)', 0.0, 5.0, 1.5)
+        session_duration = st.slider('Session_Duration (hours)', 0.0, 5.0, 1.5)
         calories_burned = st.slider('Calories Burned', 50, 1000, 400)
         workout_type = st.radio('Workout Type', ('Yoga', 'HIIT', 'Cardio', 'Strength'))
         fat_percentage = st.slider('Fat_Percentage', 5.0, 50.0, 25.0)
@@ -221,7 +221,7 @@ elif parentoption == 'Input Data':
             'Max_BPM': max_bpm,
             'Avg_BPM': avg_bpm,
             'Resting_BPM': resting_bpm,
-            'Session Duration (hours)': session_duration,
+            'Session_Duration (hours)': session_duration,
             'Calories_Burned': calories_burned,
             'Workout Type': workout_type,
             'Fat_Percentage': fat_percentage,
