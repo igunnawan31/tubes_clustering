@@ -235,50 +235,75 @@ elif parentoption == 'Input Data':
 
         input_df = pd.DataFrame([user_input_data])
 
-        # Map categorical data
-        WorkoutTypeMap = {"Strength": 0, "Cardio": 1, "Yoga": 2, "HIIT": 3}
-        GenderMap = {"Male": 0, "Female": 1}
-
-        input_df['Gender'] = input_df['Gender'].map(GenderMap)
-        input_df['Workout Type'] = input_df['Workout Type'].map(WorkoutTypeMap)
-
-        # Display Input Data
-        st.dataframe(input_df)
-
-        # Preprocessing: Handle Outliers and Scaling
-        features = ['Calories_Burned', 'Fat_Percentage', 'Session Duration (hours)', 'Experience_Level']
-        for feature in features:
+        WorkoutTypeMap = {
+            "Strength": 0,
+            "Cardio" : 1,
+            "Yoga" : 2,
+            "HIIT" : 3
+        }
+        
+        GenderMap = {
+            "Male" : 0,
+            "Female" : 1
+        }
+        data['Gender'] = data['Gender'].map(GenderMap)
+        data['Workout_Type'] = data['Workout_Type'].map(WorkoutTypeMap)
+        
+        for feature in data.columns:
+            # Hitung Q1, Q3, dan IQR using the DataFrame
             Q1 = data[feature].quantile(0.25)
             Q3 = data[feature].quantile(0.75)
             IQR = Q3 - Q1
-
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
-
-            data = data[(data[feature] >= lower_bound) & (data[feature] <= upper_bound)]
-
-        # Scale the data
+    
+            lower_bound = Q1 - 1.0 * IQR
+            upper_bound = Q3 + 1.0 * IQR
+        
+            outliers = (data[feature] < lower_bound) | (data[feature] > upper_bound)
+        
+            print(f"\nFeature: {feature}")
+            print(f"Lower Bound: {lower_bound:.2f}, Upper Bound: {upper_bound:.2f}")
+            print(f"Number of Outliers: {outliers.sum()}")
+        
+            X_scaled_df = data[~outliers]
+      
+            print("\nNew Shape: ", X_scaled_df.shape)
+            cleaned_data = X_scaled_df
+    
+        features = ['Calories_Burned','Fat_Percentage', 'Session_Duration (hours)', 'Experience_Level']
+        cleaned_data = data[features]
+      
+        st.dataframe(cleaned_data.head())
+    
+        st.write("### Feature Data Types:")
+        st.write(cleaned_data.dtypes)
+    
         scaler = StandardScaler()
-        scaled_features = scaler.fit_transform(data[features])
-        scaled_data_df = pd.DataFrame(scaled_features, columns=features)
-
-        # KMeans Clustering
-        k_clusters = 2
+        X_scaled = scaler.fit_transform(cleaned_data)
+        X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
+    
         kmeans = KMeans(n_clusters=k_clusters, random_state=42)
-        scaled_data_df['Cluster'] = kmeans.fit_predict(scaled_features)
-
-        # PCA for Visualization
+        labels = kmeans.fit_predict(X_scaled_df)
+        X_scaled_df['Cluster'] = labels
+    
         pca = PCA(n_components=2)
-        pca_features = pca.fit_transform(scaled_features)
-        pca_df = pd.DataFrame(pca_features, columns=['PC1', 'PC2'])
-        pca_df['Cluster'] = scaled_data_df['Cluster']
-
-        # Visualize Clusters
-        st.write("### Clustering Results:")
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.scatterplot(data=pca_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', ax=ax, s=100)
-        plt.title("Clusters Visualization with PCA")
-        st.pyplot(fig)
+        pca_data = pca.fit_transform(X_scaled_df.drop(columns=['Cluster']))
+        pca_df = pd.DataFrame(pca_data, columns=['PCA1', 'PCA2'])
+        pca_df['Cluster'] = labels
+        
+        plt.figure(figsize=(10, 6))
+        for cluster in range(optimal_clusters):
+            cluster_data = pca_df[pca_df['Cluster'] == cluster]
+            plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}', cmap='viridis', s=100, edgecolors='k')
+        
+        cluster_centers_pca = pca.transform(kmeans.cluster_centers_)
+        plt.scatter(cluster_centers_pca[:, 0], cluster_centers_pca[:, 1],
+                    c='red', marker='X', s=300, label='Centroids')
+        
+        plt.xlabel('PCA1')
+        plt.ylabel('PCA2')
+        plt.title('Visualisasi Hasil Clustering dengan PCA')
+        plt.legend()
+        plt.show()
 
         # Predict Cluster for User Input
         user_input_scaled = scaler.transform(input_df[features])
