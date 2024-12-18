@@ -315,4 +315,4 @@ elif parentoption == 'Input Data':
         plt.title('Visualization of Clustering with User Input')
         plt.legend()
         st.pyplot(plt)
-        st.success(f"Your data belongs to Cluster: {user_cluster}")
+        st.success(f"Your data belongs to Cluster: {user_input_pca}")
