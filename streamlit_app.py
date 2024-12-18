@@ -258,50 +258,58 @@ elif parentoption == 'Input Data':
         scaled_data_df['Cluster'] = kmeans.labels_
 
         # Prediction on User Input
-        try:
-            # Extract user input features
-            user_input_features = input_df[features]
-            user_input_pca = input_df[features_to_pca]
+    try:
+        # Scale user input features
+        user_input_features = input_df[features].fillna(data[features].mean())
+        user_input_scaled_features = scaler_features.transform(user_input_features)
 
-            # Scale user input features using trained scalers
-            user_input_scaled_features = scaler_features.transform(user_input_features.fillna(user_input_features.mean()))
-            user_input_scaled_pca = scaler_pca.transform(user_input_pca.fillna(user_input_pca.mean()))
+        # PCA for user input
+        user_input_pca_features = input_df[features_to_pca].fillna(data[features_to_pca].mean())
+        user_input_scaled_pca = scaler_pca.transform(user_input_pca_features)
+        user_input_pca = pca.transform(user_input_scaled_pca)
 
-            # Apply PCA to user input
-            user_input_pca = pca.transform(user_input_scaled_pca)
+        # Gabungkan scaled features dan PCA
+        user_input_combined = pd.concat(
+            [pd.DataFrame(user_input_scaled_features, columns=features),
+             pd.DataFrame(user_input_pca, columns=['PC1', 'PC2'])],
+            axis=1
+        )
 
-            # Combine user input features and PCA components
-            user_input_combined = pd.concat(
-                [pd.DataFrame(user_input_scaled_features, columns=features),
-                 pd.DataFrame(user_input_pca, columns=['PC1', 'PC2'])],
-                axis=1
-            )
+        # Scale gabungan user input
+        user_input_final = scaler_combined.transform(user_input_combined)
+        user_cluster = kmeans.predict(user_input_final)[0]
 
-            # Scale combined features
-            user_input_final = scaler_combined.transform(user_input_combined)
+        # Tambahkan user input ke data visualisasi
+        df_user = pd.DataFrame(user_input_final, columns=scaled_data_df.columns[:-1])
+        df_user['Cluster'] = user_cluster
+        df_user['User_Input'] = True  # Tambahkan kolom untuk penanda
 
-            # Predict cluster
-            user_cluster = model.predict(user_input_final)[0]
-            user_input_combined['Cluster'] = user_cluster
+        # Gabungkan data untuk visualisasi
+        visual_data = scaled_data_df.copy()
+        visual_data['User_Input'] = False  # Tambahkan kolom kosong
+        combined_visual = pd.concat([visual_data, df_user])
 
-            # Display the result
-            st.write("### Your Input Data with Predicted Cluster:")
-            st.dataframe(user_input_combined)
-            st.write(f"### Predicted Cluster: {user_cluster}")
+        # Visualisasi cluster
+        st.write("### Cluster Visualization with Your Data:")
+        fig, ax = plt.subplots(figsize=(8, 6))
 
-            st.write("### Cluster Visualization with Your Data:")
-            fig, ax = plt.subplots(figsize=(8, 6))
-        
-            # Plot clusters
-            sns.scatterplot(data=scaled_data_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-        
-            # Highlight user input
-            plt.scatter(user_input_final[:, -2], user_input_final[:, -1], color='red', s=200, label='Your Input')
-            plt.title("KMeans Clustering with User Data")
-            plt.xlabel("Principal Component 1")
-            plt.ylabel("Principal Component 2")
-            plt.legend()
-            st.pyplot(fig)
+        # Plot semua data
+        sns.scatterplot(data=combined_visual, x='PC1', y='PC2', hue='Cluster',
+                        palette='Set2', s=100, legend="full", ax=ax)
 
-        except ValueError as e:
-            st.error(f"An error occurred: {e}")
+        # Highlight user input
+        user_input_point = combined_visual[combined_visual['User_Input'] == True]
+        plt.scatter(user_input_point['PC1'], user_input_point['PC2'], 
+                    color='red', s=200, label='Your Input', edgecolor='black')
+
+        plt.title("KMeans Clustering Results with User Data")
+        plt.xlabel("Principal Component 1")
+        plt.ylabel("Principal Component 2")
+        plt.legend()
+        st.pyplot(fig)
+
+        # Show predicted cluster
+        st.success(f"### Predicted Cluster for Your Data: {user_cluster}")
+
+    except ValueError as e:
+        st.error(f"An error occurred: {e}")
