@@ -183,7 +183,8 @@ elif parentoption == 'Models':
     plt.ylabel('PCA2')
     plt.title('Visualisasi Hasil Clustering dengan PCA')
     plt.legend()
-    plt.show()
+    
+    st.pyplot(plt)
 
 # 3. Input Data Section
 elif parentoption == 'Input Data':
