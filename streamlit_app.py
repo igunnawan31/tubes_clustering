@@ -310,4 +310,14 @@ elif parentoption == 'Input Data':
         user_input_scaled = scaler.transform(input_df[features])
         user_cluster = kmeans.predict(user_input_scaled)[0]
 
+        # Add the user input point
+        plt.scatter(user_input_pca[0, 0], user_input_pca[0, 1], 
+                    c='blue', marker='o', s=200, label='User Input', edgecolors='k')
+        
+        plt.xlabel('PCA1')
+        plt.ylabel('PCA2')
+        plt.title('Visualization of Clustering with User Input')
+        plt.legend()
+        plt.show()
+
         st.success(f"Your data belongs to Cluster: {user_cluster}")
