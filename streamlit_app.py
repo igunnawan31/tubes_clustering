@@ -292,12 +292,12 @@ elif parentoption == 'Input Data':
         pca_df['Cluster'] = labels
 
         # Predict Cluster for User Input
-        user_input_scaled = scaler.transform(input_df[features])
-        user_cluster = kmeans.predict(user_input_scaled)[0]
-
+        user_input_scaled = scaler.transform(input_df[features])  # Match features used for scaling
+        user_input_pca = pca.transform(user_input_scaled)  # Project scaled data into PCA space
+        
         # Visualization
         plt.figure(figsize=(10, 6))
-        for cluster in range(2):
+        for cluster in range(2):  # Adjust this range based on your number of clusters
             cluster_data = pca_df[pca_df['Cluster'] == cluster]
             plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}', s=100, edgecolors='k')
         
@@ -305,17 +305,14 @@ elif parentoption == 'Input Data':
         cluster_centers_pca = pca.transform(kmeans.cluster_centers_)
         plt.scatter(cluster_centers_pca[:, 0], cluster_centers_pca[:, 1],
                     c='red', marker='X', s=300, label='Centroids')
-
-        # Add user input
+        
+        # Add user input point
         plt.scatter(user_input_pca[0, 0], user_input_pca[0, 1], 
                     c='blue', marker='o', s=200, label='User Input', edgecolors='k')
-
+        
         plt.xlabel('PCA1')
         plt.ylabel('PCA2')
         plt.title('Visualization of Clustering with User Input')
         plt.legend()
         st.pyplot(plt)
-
-        # Predict Cluster for User Input
-        user_cluster = kmeans.predict(user_input_scaled)[0]
         st.success(f"Your data belongs to Cluster: {user_cluster}")
