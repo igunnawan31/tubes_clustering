@@ -44,8 +44,7 @@ if parentoption == 'Exploratory Data Analysis':
     elif option == 'Feature Data':
         st.subheader("📈 Feature Data")
         with st.expander('Feature Data'):
-            features = ['Calories_Burned', 'Water_Intake (liters)', 
-                        'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
+            features = ['Calories_Burned','Fat_Percentage', 'Session_Duration (hours)', 'Experience_Level']
             st.write("### Selected Features:")
             feature_data = data[features]
             st.dataframe(feature_data.head())
@@ -54,68 +53,59 @@ if parentoption == 'Exploratory Data Analysis':
             restdata = data.drop(features, axis=1)
             st.dataframe(restdata.head())
 
-    # Option 3: PCA Data
-    elif option == 'PCA Data':
-        st.subheader("🧩 PCA Data")
-        with st.expander('PCA Data'):
-            features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
-            st.write("### Features for PCA:")
-            datapca = data[features_to_pca]
-            st.dataframe(datapca.head())
-
-            st.write("### Cleaned PCA Data:")
-            datapca_clean = datapca.fillna(datapca.mean())
-            st.dataframe(datapca_clean.head())
-
-            st.write("### Normalization PCA Data:")
-            scaler = StandardScaler()
-            PCA_scaled = scaler.fit_transform(datapca_clean)
-            PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
-
-            st.write("#### PCA Data after Cleaned & Normalization (Standard Scaler):")
-            st.dataframe(PCA_scaled_df.head())
-
-    # Option 4: Data Normalization
+    # Option 3: Data Normalization
     elif option == 'Data Normalization':
         st.subheader("🔧 Data Normalization")
         with st.expander('Data Normalization'):
             st.write("### Feature Data after Handling Missing Values:")
-            features = ['Calories_Burned', 'Water_Intake (liters)', 
-                        'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
-            feature_data = data[features]
-            feature_data_clean = feature_data.fillna(feature_data.mean())
-            st.dataframe(feature_data_clean.head())
+            WorkoutTypeMap = {
+                "Strength": 0,
+                "Cardio" : 1,
+                "Yoga" : 2,
+                "HIIT" : 3
+            }
+            
+            GenderMap = {
+                "Male" : 0,
+                "Female" : 1
+            }
+            data['Gender'] = data['Gender'].map(GenderMap)
+            data['Workout_Type'] = data['Workout_Type'].map(WorkoutTypeMap)
+            
+            for feature in data.columns:
+                # Hitung Q1, Q3, dan IQR using the DataFrame
+                Q1 = data[feature].quantile(0.25)
+                Q3 = data[feature].quantile(0.75)
+                IQR = Q3 - Q1
+        
+                lower_bound = Q1 - 1.0 * IQR
+                upper_bound = Q3 + 1.0 * IQR
+            
+                outliers = (data[feature] < lower_bound) | (data[feature] > upper_bound)
+            
+                print(f"\nFeature: {feature}")
+                print(f"Lower Bound: {lower_bound:.2f}, Upper Bound: {upper_bound:.2f}")
+                print(f"Number of Outliers: {outliers.sum()}")
+            
+                X_scaled_df = data[~outliers]
+          
+                print("\nNew Shape: ", X_scaled_df.shape)
+                cleaned_data = X_scaled_df
+
+            features = ['Calories_Burned','Fat_Percentage', 'Session_Duration (hours)', 'Experience_Level']
+            cleaned_data = data[features]
+          
+            st.dataframe(cleaned_data.head())
 
             st.write("### Feature Data Types:")
-            st.write(feature_data_clean.dtypes)
+            st.write(cleaned_data.dtypes)
 
             scaler = StandardScaler()
-            X_scaled = scaler.fit_transform(feature_data_clean)
+            X_scaled = scaler.fit_transform(cleaned_data)
             X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
 
             st.write("### Feature Data after Normalization (StandardScaler):")
             st.dataframe(X_scaled_df.head())
-
-            # Adding PCA to normalized data
-            features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
-            datapca = data[features_to_pca]
-            datapca_clean = datapca.fillna(datapca.mean())
-
-            scaler = StandardScaler()
-            PCA_scaled = scaler.fit_transform(datapca_clean)
-            PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
-
-            pca = PCA(n_components=2)
-            data_pca = pca.fit_transform(PCA_scaled_df)
-            df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
-
-            cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
-            scaler_data = StandardScaler()
-            scaled_data = scaler.fit_transform(cleaned_data)
-            scaled_data_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
-
-            st.write("### Data Final for Clustering")
-            st.dataframe(scaled_data_final.head())
 
 # 2. Models Section
 elif parentoption == 'Models':
@@ -125,58 +115,75 @@ elif parentoption == 'Models':
     st.sidebar.subheader("KMeans Settings")
     k_clusters = st.sidebar.slider("Select Number of Clusters (K)", 2, 10, 3)
   
-    features = ['Calories_Burned', 'Water_Intake (liters)', 
-                'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
-    feature_data = data[features]
-    feature_data_clean = feature_data.fillna(feature_data.mean())
+    WorkoutTypeMap = {
+        "Strength": 0,
+        "Cardio" : 1,
+        "Yoga" : 2,
+        "HIIT" : 3
+    }
+    
+    GenderMap = {
+        "Male" : 0,
+        "Female" : 1
+    }
+    data['Gender'] = data['Gender'].map(GenderMap)
+    data['Workout_Type'] = data['Workout_Type'].map(WorkoutTypeMap)
+    
+    for feature in data.columns:
+        # Hitung Q1, Q3, dan IQR using the DataFrame
+        Q1 = data[feature].quantile(0.25)
+        Q3 = data[feature].quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower_bound = Q1 - 1.0 * IQR
+        upper_bound = Q3 + 1.0 * IQR
+    
+        outliers = (data[feature] < lower_bound) | (data[feature] > upper_bound)
+    
+        print(f"\nFeature: {feature}")
+        print(f"Lower Bound: {lower_bound:.2f}, Upper Bound: {upper_bound:.2f}")
+        print(f"Number of Outliers: {outliers.sum()}")
+    
+        X_scaled_df = data[~outliers]
+  
+        print("\nNew Shape: ", X_scaled_df.shape)
+        cleaned_data = X_scaled_df
+
+    features = ['Calories_Burned','Fat_Percentage', 'Session_Duration (hours)', 'Experience_Level']
+    cleaned_data = data[features]
+  
+    st.dataframe(cleaned_data.head())
+
+    st.write("### Feature Data Types:")
+    st.write(cleaned_data.dtypes)
 
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(feature_data_clean)
+    X_scaled = scaler.fit_transform(cleaned_data)
     X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data.columns)
 
-    features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
-    datapca = data[features_to_pca]
-    datapca_clean = datapca.fillna(datapca.mean())
-
-    scaler = StandardScaler()
-    PCA_scaled = scaler.fit_transform(datapca_clean)
-    PCA_scaled_df = pd.DataFrame(PCA_scaled, columns=features_to_pca)
-
-    pca = PCA(n_components=2)
-    data_pca = pca.fit_transform(PCA_scaled_df)
-    df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
-
-    cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
-    scaler_data = StandardScaler()
-    scaled_data = scaler.fit_transform(cleaned_data)
-    scaled_data_final = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
-
-    st.write("### Data Final for Clustering")
-    st.dataframe(scaled_data_final.head())
-
-    scaler = StandardScaler()
-    scaled_pca = scaler.fit_transform(scaled_data_final)
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_pca)
-  
-    df_pca = pd.DataFrame(pca_result, columns=['PC1', 'PC2'])
-    st.write("### PCA-Reduced Data:")
-    st.dataframe(df_pca.head())
-
     kmeans = KMeans(n_clusters=k_clusters, random_state=42)
-    df_pca['Cluster'] = kmeans.fit_predict(df_pca)
+    labels = kmeans.fit_predict(X_scaled_df)
+    X_scaled_df['Cluster'] = labels
 
-    st.write(f"### KMeans Clustering with {k_clusters} Clusters:")
-    st.dataframe(df_pca.head())
-
-    # Visualization
-    st.write("### Cluster Visualization")
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.scatterplot(data=df_pca, x='PC1', y='PC2', hue='Cluster', palette='Set2', s=100, legend="full", ax=ax)
-    plt.title("KMeans Clustering Results")
-    plt.xlabel("Principal Component 1")
-    plt.ylabel("Principal Component 2")
-    st.pyplot(fig)
+    pca = PCA(n_components=2)
+    pca_data = pca.fit_transform(X_scaled_df.drop(columns=['Cluster']))
+    pca_df = pd.DataFrame(pca_data, columns=['PCA1', 'PCA2'])
+    pca_df['Cluster'] = labels
+    
+    plt.figure(figsize=(10, 6))
+    for cluster in range(optimal_clusters):
+        cluster_data = pca_df[pca_df['Cluster'] == cluster]
+        plt.scatter(cluster_data['PCA1'], cluster_data['PCA2'], label=f'Cluster {cluster}', cmap='viridis', s=100, edgecolors='k')
+    
+    cluster_centers_pca = pca.transform(kmeans.cluster_centers_)
+    plt.scatter(cluster_centers_pca[:, 0], cluster_centers_pca[:, 1],
+                c='red', marker='X', s=300, label='Centroids')
+    
+    plt.xlabel('PCA1')
+    plt.ylabel('PCA2')
+    plt.title('Visualisasi Hasil Clustering dengan PCA')
+    plt.legend()
+    plt.show()
 
 # 3. Input Data Section
 elif parentoption == 'Input Data':
@@ -225,91 +232,56 @@ elif parentoption == 'Input Data':
         }
 
         # Convert User Input to DataFrame
+
         input_df = pd.DataFrame([user_input_data])
-        st.dataframe(input_df.head())
 
-        # KMeans Model Preparation (Training)
-        features = ['Calories_Burned', 'Water_Intake (liters)', 'Workout_Frequency (days/week)', 'Fat_Percentage', 'BMI']
-        features_to_pca = ['Weight (kg)', 'Height (m)', 'Max_BPM', 'Avg_BPM', 'Resting_BPM', 'Experience_Level']
+        # Map categorical data
+        WorkoutTypeMap = {"Strength": 0, "Cardio": 1, "Yoga": 2, "HIIT": 3}
+        GenderMap = {"Male": 0, "Female": 1}
 
-        # Train with cleaned data
-        feature_data_clean = data[features].fillna(data[features].mean())
-        scaler_features = StandardScaler()
-        X_scaled = scaler_features.fit_transform(feature_data_clean)
-        X_scaled_df = pd.DataFrame(X_scaled, columns=feature_data_clean.columns)
+        input_df['Gender'] = input_df['Gender'].map(GenderMap)
+        input_df['Workout_Type'] = input_df['Workout_Type'].map(WorkoutTypeMap)
 
-        # PCA for other features
-        datapca = data[features_to_pca].fillna(data[features_to_pca].mean())
-        scaler_pca = StandardScaler()
-        PCA_scaled = scaler_pca.fit_transform(datapca)
+        # Display Input Data
+        st.dataframe(input_df)
+
+        # Preprocessing: Handle Outliers and Scaling
+        features = ['Calories_Burned', 'Fat_Percentage', 'Session Duration (hours)', 'Experience_Level']
+        for feature in features:
+            Q1 = data[feature].quantile(0.25)
+            Q3 = data[feature].quantile(0.75)
+            IQR = Q3 - Q1
+
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+
+            data = data[(data[feature] >= lower_bound) & (data[feature] <= upper_bound)]
+
+        # Scale the data
+        scaler = StandardScaler()
+        scaled_features = scaler.fit_transform(data[features])
+        scaled_data_df = pd.DataFrame(scaled_features, columns=features)
+
+        # KMeans Clustering
+        k_clusters = 4
+        kmeans = KMeans(n_clusters=k_clusters, random_state=42)
+        scaled_data_df['Cluster'] = kmeans.fit_predict(scaled_features)
+
+        # PCA for Visualization
         pca = PCA(n_components=2)
-        data_pca = pca.fit_transform(PCA_scaled)
-        df_pca = pd.DataFrame(data_pca, columns=['PC1', 'PC2'])
+        pca_features = pca.fit_transform(scaled_features)
+        pca_df = pd.DataFrame(pca_features, columns=['PC1', 'PC2'])
+        pca_df['Cluster'] = scaled_data_df['Cluster']
 
-        # Combine and scale data for training
-        cleaned_data = pd.concat([X_scaled_df, df_pca], axis=1)
-        scaler_combined = StandardScaler()
-        scaled_data = scaler_combined.fit_transform(cleaned_data)
-        scaled_data_df = pd.DataFrame(scaled_data, columns=cleaned_data.columns)
-
-        kmeans = KMeans(n_clusters=3, random_state=42)
-        model = kmeans.fit(scaled_data_df)
-
-        scaled_data_df['Cluster'] = kmeans.labels_
-
-        # Prediction on User Input
-    try:
-        # Scale user input features
-        user_input_features = input_df[features].fillna(data[features].mean())
-        user_input_scaled_features = scaler_features.transform(user_input_features)
-
-        # PCA for user input
-        user_input_pca_features = input_df[features_to_pca].fillna(data[features_to_pca].mean())
-        user_input_scaled_pca = scaler_pca.transform(user_input_pca_features)
-        user_input_pca = pca.transform(user_input_scaled_pca)
-
-        # Gabungkan scaled features dan PCA
-        user_input_combined = pd.concat(
-            [pd.DataFrame(user_input_scaled_features, columns=features),
-             pd.DataFrame(user_input_pca, columns=['PC1', 'PC2'])],
-            axis=1
-        )
-
-        # Scale gabungan user input
-        user_input_final = scaler_combined.transform(user_input_combined)
-        user_cluster = kmeans.predict(user_input_final)[0]
-
-        # Tambahkan user input ke data visualisasi
-        df_user = pd.DataFrame(user_input_final, columns=scaled_data_df.columns[:-1])
-        df_user['Cluster'] = user_cluster
-        df_user['User_Input'] = True  # Tambahkan kolom untuk penanda
-
-        # Gabungkan data untuk visualisasi
-        visual_data = scaled_data_df.copy()
-        visual_data['User_Input'] = False  # Tambahkan kolom kosong
-        combined_visual = pd.concat([visual_data, df_user])
-
-        # Visualisasi cluster
-        st.write("### Cluster Visualization with Your Data:")
+        # Visualize Clusters
+        st.write("### Clustering Results:")
         fig, ax = plt.subplots(figsize=(8, 6))
-
-        # Plot semua data
-        sns.scatterplot(data=combined_visual, x='PC1', y='PC2', hue='Cluster',
-                        palette='Set2', s=100, legend="full", ax=ax)
-
-        # Highlight user input
-        user_input_point = combined_visual[combined_visual['User_Input'] == True]
-        plt.scatter(user_input_point['PC1'], user_input_point['PC2'], 
-                    color='red', s=200, label='Your Input', edgecolor='black')
-
-        plt.title("KMeans Clustering Results with User Data")
-        plt.xlabel("Principal Component 1")
-        plt.ylabel("Principal Component 2")
-        plt.legend()
+        sns.scatterplot(data=pca_df, x='PC1', y='PC2', hue='Cluster', palette='Set2', ax=ax, s=100)
+        plt.title("Clusters Visualization with PCA")
         st.pyplot(fig)
 
-        # Show predicted cluster
-        st.success(f"### Predicted Cluster for Your Data: {user_cluster}")
+        # Predict Cluster for User Input
+        user_input_scaled = scaler.transform(input_df[features])
+        user_cluster = kmeans.predict(user_input_scaled)[0]
 
-    except ValueError as e:
-        st.error(f"An error occurred: {e}")
+        st.success(f"Your data belongs to Cluster: {user_cluster}")
