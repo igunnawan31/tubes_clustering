@@ -25,7 +25,7 @@ if parentoption == 'Exploratory Data Analysis':
 
     # Sidebar Child Options
     option = st.sidebar.radio("Choose EDA Section:", 
-                              ['Dataset Overview', 'Feature Data', 'PCA Data', 'Data Normalization'])
+                              ['Dataset Overview', 'Feature Data', 'Data Normalization'])
 
     # Option 1: Dataset Overview
     if option == 'Dataset Overview':
