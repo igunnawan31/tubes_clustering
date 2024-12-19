@@ -294,6 +294,8 @@ elif parentoption == 'Input Data':
         # Predict Cluster for User Input
         user_input_scaled = scaler.transform(input_df[features])  # Match features used for scaling
         user_input_pca = pca.transform(user_input_scaled)  # Project scaled data into PCA space
+
+        predicted_cluster = kmeans.predict(user_input_scaled)[0] 
         
         # Visualization
         plt.figure(figsize=(10, 6))
@@ -315,4 +317,4 @@ elif parentoption == 'Input Data':
         plt.title('Visualization of Clustering with User Input')
         plt.legend()
         st.pyplot(plt)
-        st.success(f"Your data belongs to Cluster: {user_input_pca}")
+        st.success(f"Your data belongs to Cluster: {predicted_cluster}")
